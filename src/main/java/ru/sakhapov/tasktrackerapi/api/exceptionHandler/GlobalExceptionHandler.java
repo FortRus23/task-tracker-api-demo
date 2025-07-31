@@ -1,0 +1,46 @@
+package ru.sakhapov.tasktrackerapi.api.exceptionHandler;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.BadRequestException;
+import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.ErrorDto;
+import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.InvalidCredentialsException;
+
+import java.util.HashMap;
+import java.util.Map;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
+
+        Map<String, String> errors = new HashMap<>();
+
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage())
+        );
+
+        return ResponseEntity.badRequest().body(errors);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorDto> handleBadRequestException(BadRequestException ex) {
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setError("Bad request");
+        errorDto.setErrorDescription(ex.getMessage());
+        return ResponseEntity.badRequest().body(errorDto);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorDto> handleForbidenException(InvalidCredentialsException ex) {
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setError("Unauthorized");
+        errorDto.setErrorDescription(ex.getMessage());
+        return ResponseEntity.badRequest().body(errorDto);
+    }
+
+}

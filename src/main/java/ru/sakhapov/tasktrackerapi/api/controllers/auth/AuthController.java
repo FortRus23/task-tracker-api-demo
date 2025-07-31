@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.sakhapov.tasktrackerapi.api.exceptions.BadRequestException;
+import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.BadRequestException;
 import ru.sakhapov.tasktrackerapi.store.repositories.UserRepository;
 
 import java.io.IOException;
@@ -41,7 +41,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(
-            @RequestBody AuthenticationRequest request) {
+            @Valid @RequestBody AuthenticationRequest request) {
 
         return ResponseEntity.ok(service.login(request));
     }

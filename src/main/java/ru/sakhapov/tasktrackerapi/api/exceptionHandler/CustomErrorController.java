@@ -1,4 +1,4 @@
-package ru.sakhapov.tasktrackerapi.api.exceptions;
+package ru.sakhapov.tasktrackerapi.api.exceptionHandler;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.WebRequest;
+import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.ErrorDto;
 
 import java.util.Map;
 import java.util.Optional;

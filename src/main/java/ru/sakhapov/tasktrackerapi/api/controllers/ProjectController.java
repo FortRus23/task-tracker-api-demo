@@ -12,7 +12,7 @@ import ru.sakhapov.tasktrackerapi.api.dto.AckDto;
 import ru.sakhapov.tasktrackerapi.api.dto.ProjectDto;
 import ru.sakhapov.tasktrackerapi.api.dto.projectControllerDto.ProjectCreateDto;
 import ru.sakhapov.tasktrackerapi.api.dto.projectControllerDto.ProjectUpdateDto;
-import ru.sakhapov.tasktrackerapi.api.exceptions.BadRequestException;
+import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.BadRequestException;
 import ru.sakhapov.tasktrackerapi.api.factories.ProjectDtoFactory;
 import ru.sakhapov.tasktrackerapi.store.entities.ProjectEntity;
 import ru.sakhapov.tasktrackerapi.store.repositories.ProjectRepository;

@@ -1,4 +1,4 @@
-package ru.sakhapov.tasktrackerapi.api.exceptions;
+package ru.sakhapov.tasktrackerapi.api.exceptionHandler;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpHeaders;

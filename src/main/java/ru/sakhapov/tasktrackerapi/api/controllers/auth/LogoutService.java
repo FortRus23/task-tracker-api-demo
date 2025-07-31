@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
-import ru.sakhapov.tasktrackerapi.api.exceptions.TokenNotFoundException;
+import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.TokenNotFoundException;
 import ru.sakhapov.tasktrackerapi.store.jwt.entites.Token;
 import ru.sakhapov.tasktrackerapi.store.repositories.TokenRepository;
 

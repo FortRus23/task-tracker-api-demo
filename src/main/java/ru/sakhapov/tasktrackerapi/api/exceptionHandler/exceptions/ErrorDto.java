@@ -1,4 +1,4 @@
-package ru.sakhapov.tasktrackerapi.api.exceptions;
+package ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

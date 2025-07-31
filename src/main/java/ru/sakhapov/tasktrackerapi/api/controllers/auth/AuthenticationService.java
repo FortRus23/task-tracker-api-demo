@@ -4,10 +4,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.sakhapov.tasktrackerapi.api.exceptions.BadRequestException;
+import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.InvalidCredentialsException;
 import ru.sakhapov.tasktrackerapi.store.entities.Role;
 import ru.sakhapov.tasktrackerapi.store.entities.User;
 import ru.sakhapov.tasktrackerapi.store.jwt.config.JwtService;
@@ -56,12 +57,16 @@ public class AuthenticationService {
 
     public AuthenticationResponse login(AuthenticationRequest request) {
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
+        } catch (BadCredentialsException ex) {
+            throw new InvalidCredentialsException("Invalid username or password");
+        }
 
         var user = repository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));

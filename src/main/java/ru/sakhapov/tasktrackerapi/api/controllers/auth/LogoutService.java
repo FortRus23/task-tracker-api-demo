@@ -3,7 +3,9 @@ package ru.sakhapov.tasktrackerapi.api.controllers.auth;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
@@ -14,9 +16,10 @@ import ru.sakhapov.tasktrackerapi.store.repositories.TokenRepository;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class LogoutService implements LogoutHandler {
 
-    private final TokenRepository tokenRepository;
+    TokenRepository tokenRepository;
 
     @Override
     public void logout(

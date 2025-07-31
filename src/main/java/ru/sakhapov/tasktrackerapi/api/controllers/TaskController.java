@@ -1,13 +1,17 @@
 package ru.sakhapov.tasktrackerapi.api.controllers;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.sakhapov.tasktrackerapi.api.controllers.helpers.ControllerHelper;
 import ru.sakhapov.tasktrackerapi.api.dto.AckDto;
 import ru.sakhapov.tasktrackerapi.api.dto.TaskDto;
+import ru.sakhapov.tasktrackerapi.api.dto.taskControllerDto.TaskCreateDto;
+import ru.sakhapov.tasktrackerapi.api.dto.taskControllerDto.TaskUpdateDto;
 import ru.sakhapov.tasktrackerapi.api.exceptions.BadRequestException;
 import ru.sakhapov.tasktrackerapi.api.exceptions.NotFoundException;
 import ru.sakhapov.tasktrackerapi.api.factories.TaskDtoFactory;
@@ -48,52 +52,45 @@ public class TaskController {
     }
 
     @PostMapping(CREATE_TASK)
+    @ResponseStatus(HttpStatus.CREATED)
     public TaskDto createTask(@PathVariable("task_state_id") Long taskStateId,
-                              @RequestParam(name = "task_name") String taskName,
-                              @RequestParam(name = "task_description") String taskDescription) {
-
-        if (taskName.isBlank() || taskDescription.isBlank()) {
-            throw new BadRequestException("Task name or description can't be empty.");
-        }
+                              @Valid @RequestBody TaskCreateDto dto) {
 
         TaskStateEntity taskState = controllerHelper.getTaskStateOrThrowException(taskStateId);
 
-        for (TaskEntity task : taskState.getTasks()) {
+        boolean taskExists = taskState.getTasks().stream()
+                .anyMatch(task -> task.getName().equalsIgnoreCase(dto.getName()));
 
-            if (task.getName().equalsIgnoreCase(taskName)) {
-                throw new BadRequestException(String.format("Task with '%s' name already exists", taskName));
-            }
+        if(taskExists) {
+            throw new BadRequestException(
+                    String.format("Task with name '%s' already exists", dto.getName())
+            );
         }
 
         TaskEntity task = taskRepository.saveAndFlush(
                 TaskEntity.builder()
-                        .name(taskName)
-                        .description(taskDescription)
+                        .name(dto.getName())
+                        .description(dto.getDescription())
                         .taskState(taskState)
                         .build()
         );
 
-        final TaskEntity savedTask = taskRepository.saveAndFlush(task);
+        final TaskEntity savedTask = taskRepository.save(task);
 
         return taskDtoFactory.makeTaskDto(savedTask);
     }
 
     @PatchMapping(UPDATE_TASK)
     public TaskDto updateTaskState(@PathVariable("task_id") Long taskId,
-                                   @RequestParam(name = "task_name") String taskName,
-                                   @RequestParam(name = "task_description") String taskDescription) {
-
-        if (taskName.isBlank() || taskDescription.isBlank()) {
-            throw new BadRequestException("Task name or description can't be empty.");
-        }
+                                   @Valid @RequestBody TaskUpdateDto dto) {
 
         TaskEntity taskEntity = getTaskOrThrowException(taskId);
 
-        taskEntity.setName(taskName);
+        taskEntity.setName(dto.getName());
 
-        taskEntity.setDescription(taskDescription);
+        taskEntity.setDescription(dto.getDescription());
 
-        taskEntity = taskRepository.saveAndFlush(taskEntity);
+        taskEntity = taskRepository.save(taskEntity);
 
         return taskDtoFactory.makeTaskDto(taskEntity);
     }

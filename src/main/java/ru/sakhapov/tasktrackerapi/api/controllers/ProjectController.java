@@ -1,13 +1,18 @@
 package ru.sakhapov.tasktrackerapi.api.controllers;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.sakhapov.tasktrackerapi.api.controllers.helpers.ControllerHelper;
 import ru.sakhapov.tasktrackerapi.api.dto.AckDto;
 import ru.sakhapov.tasktrackerapi.api.dto.ProjectDto;
+import ru.sakhapov.tasktrackerapi.api.dto.projectControllerDto.ProjectCreateDto;
+import ru.sakhapov.tasktrackerapi.api.dto.projectControllerDto.ProjectUpdateDto;
 import ru.sakhapov.tasktrackerapi.api.exceptions.BadRequestException;
 import ru.sakhapov.tasktrackerapi.api.factories.ProjectDtoFactory;
 import ru.sakhapov.tasktrackerapi.store.entities.ProjectEntity;
@@ -38,25 +43,24 @@ public class ProjectController {
     public static final String EDIT_PROJECT = "/api/projects/{project_id}";
 
     @PostMapping(CREATE_PROJECT)
-    public ProjectDto createProject(@RequestParam String name) {
-
-        if (name.isBlank()) {
-            throw new BadRequestException("Project name can't be empty.");
-        }
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProjectDto createProject(@Valid @RequestBody ProjectCreateDto dto) {
 
         projectRepository
-                .findByName(name)
+                .findByName(dto.getName())
                 .ifPresent(project -> {
                     throw new BadRequestException(
-                            String.format("Project with name '%s' already exists.", name)
+                            String.format("Project with name '%s' already exists.", dto.getName())
                     );
                 });
 
         ProjectEntity project = projectRepository.saveAndFlush(
                 ProjectEntity.builder()
-                        .name(name)
+                        .name(dto.getName())
                         .build()
         );
+
+        project = projectRepository.save(project);
 
         return projectDtoFactory.makeProjectDto(project);
     }
@@ -64,26 +68,21 @@ public class ProjectController {
 
     @PatchMapping(EDIT_PROJECT)
     public ProjectDto editProject(@PathVariable("project_id") Long projectId,
-                                  @RequestParam String name) {
-
-        if (name.trim().isEmpty()) {
-            throw new BadRequestException("Project name can't be empty.");
-        }
+                                  @Valid @RequestBody ProjectUpdateDto dto) {
 
         ProjectEntity project = controllerHelper.getProjectOrThrowException(projectId);
 
         projectRepository
-                .findByName(name)
+                .findByName(dto.getName())
                 .filter(elseProject -> !Objects.equals(elseProject.getId(), projectId))
                 .ifPresent(elseProject -> {
                     throw new BadRequestException(
-                            String.format("Project with name '%s' already exists.", name)
+                            String.format("Project with name '%s' already exists.", dto.getName())
                     );
                 });
 
-        project.setName(name);
-
-        project = projectRepository.saveAndFlush(project);
+        project.setName(dto.getName());
+        project = projectRepository.save(project);
 
         return projectDtoFactory.makeProjectDto(project);
     }
@@ -110,7 +109,6 @@ public class ProjectController {
         projectRepository.deleteById(projectId);
 
         return AckDto.makeDefault(true);
-
     }
 
 }

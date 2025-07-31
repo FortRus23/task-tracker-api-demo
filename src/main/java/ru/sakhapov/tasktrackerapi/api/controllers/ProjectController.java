@@ -88,9 +88,10 @@ public class ProjectController {
 
     @GetMapping(GET_PROJECTS)
     public List<ProjectDto> fetchProjects(
-            @RequestParam(value = "prefix_name", required = false) Optional<String> optionalPrefixName) {
+            @RequestParam(value = "prefix_name", required = false) String prefixName) {
 
-        optionalPrefixName = optionalPrefixName.filter(prefixName -> !prefixName.trim().isEmpty());
+        Optional<String> optionalPrefixName = Optional.ofNullable(prefixName)
+                .filter(p -> !p.trim().isEmpty());
 
         Stream<ProjectEntity> projectStream = optionalPrefixName
                 .map(projectRepository::streamAllByNameStartsWithIgnoreCase)

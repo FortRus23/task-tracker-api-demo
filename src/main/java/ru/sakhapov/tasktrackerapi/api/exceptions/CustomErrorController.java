@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.Map;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -30,13 +31,13 @@ public class CustomErrorController implements ErrorController {
                 ErrorAttributeOptions.of(ErrorAttributeOptions.Include.EXCEPTION, ErrorAttributeOptions.Include.MESSAGE)
         );
 
+        int status = Optional.ofNullable((Integer) attributes.get("status")).orElse(500);
+
         return ResponseEntity
-                .status((Integer) attributes.get("status"))
-                .body(ErrorDto
-                        .builder()
+                .status(status)
+                .body(ErrorDto.builder()
                         .error((String) attributes.get("error"))
                         .errorDescription((String) attributes.get("message"))
-                        .build()
-                );
+                        .build());
     }
 }

@@ -3,7 +3,6 @@ package ru.sakhapov.tasktrackerapi.api.controllers;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;

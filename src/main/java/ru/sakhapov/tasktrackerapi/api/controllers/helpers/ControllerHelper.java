@@ -14,7 +14,7 @@ import ru.sakhapov.tasktrackerapi.store.repositories.TaskStateRepository;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Component
-@Transactional
+@Transactional(readOnly = true)
 public class ControllerHelper {
 
     ProjectRepository projectRepository;

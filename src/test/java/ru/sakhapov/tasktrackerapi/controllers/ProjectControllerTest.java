@@ -36,7 +36,6 @@ public class ProjectControllerTest {
 
     @Test
     void shouldCreateProjectAndReturn201() throws Exception {
-        // given
         var requestBody = """
                     {
                       "name": "Test Project"

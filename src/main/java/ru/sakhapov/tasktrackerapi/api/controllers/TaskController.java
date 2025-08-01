@@ -13,7 +13,6 @@ import ru.sakhapov.tasktrackerapi.api.dto.TaskDto;
 import ru.sakhapov.tasktrackerapi.api.dto.taskControllerDto.TaskCreateDto;
 import ru.sakhapov.tasktrackerapi.api.dto.taskControllerDto.TaskUpdateDto;
 import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.BadRequestException;
-import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.NotFoundException;
 import ru.sakhapov.tasktrackerapi.api.factories.TaskDtoFactory;
 import ru.sakhapov.tasktrackerapi.store.entities.TaskEntity;
 import ru.sakhapov.tasktrackerapi.store.entities.TaskStateEntity;
@@ -26,20 +25,18 @@ import java.util.stream.Collectors;
 @Transactional
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequestMapping("/api")
 public class TaskController {
 
     TaskRepository taskRepository;
-
     TaskDtoFactory taskDtoFactory;
-
     ControllerHelper controllerHelper;
 
-    public static final String GET_TASKS = "/api/task-states/{task_state_id}/tasks";
-    public static final String CREATE_TASK = "/api/task-states/{task_state_id}/task";
-    public static final String UPDATE_TASK = "/api/task/{task_id}";
-    public static final String DELETE_TASK = "/api/task/{task_id}";
 
-    @GetMapping(GET_TASKS)
+    /**
+     * Получить список задач внутри TaskState
+     */
+    @GetMapping("/task-states/{task_state_id}/tasks")
     public List<TaskDto> getTasks(@PathVariable("task_state_id") Long taskStateId) {
 
         TaskStateEntity taskState = controllerHelper.getTaskStateOrThrowException(taskStateId);
@@ -51,7 +48,10 @@ public class TaskController {
                 .collect(Collectors.toList());
     }
 
-    @PostMapping(CREATE_TASK)
+    /**
+     * Создать новую задачу в TaskState
+     */
+    @PostMapping("/task-states/{task_state_id}/task")
     @ResponseStatus(HttpStatus.CREATED)
     public TaskDto createTask(@PathVariable("task_state_id") Long taskStateId,
                               @Valid @RequestBody TaskCreateDto dto) {
@@ -80,11 +80,14 @@ public class TaskController {
         return taskDtoFactory.makeTaskDto(savedTask);
     }
 
-    @PatchMapping(UPDATE_TASK)
+    /**
+     * Обновить задачу по ID
+     */
+    @PatchMapping("/task/{task_id}")
     public TaskDto updateTaskState(@PathVariable("task_id") Long taskId,
                                    @Valid @RequestBody TaskUpdateDto dto) {
 
-        TaskEntity taskEntity = getTaskOrThrowException(taskId);
+        TaskEntity taskEntity = controllerHelper.getTaskOrThrowException(taskId);
 
         taskEntity.setName(dto.getName());
 
@@ -95,23 +98,17 @@ public class TaskController {
         return taskDtoFactory.makeTaskDto(taskEntity);
     }
 
-    @DeleteMapping(DELETE_TASK)
+
+    /**
+     * Удалить задачу по ID
+     */
+    @DeleteMapping("/task/{task_id}")
     public AckDto deleteTask(@PathVariable(name = "task_id") Long taskId) {
 
-        TaskEntity changeTask = getTaskOrThrowException(taskId);
+        TaskEntity changeTask = controllerHelper.getTaskOrThrowException(taskId);
 
         taskRepository.delete(changeTask);
 
         return AckDto.builder().answer(true).build();
     }
-
-    private TaskEntity getTaskOrThrowException(Long taskId) {
-
-        return taskRepository
-                .findById(taskId)
-                .orElseThrow(() ->
-                        new NotFoundException(String.format("Task with this '%s' can't be found", taskId))
-                );
-    }
-
 }

@@ -12,7 +12,6 @@ import ru.sakhapov.tasktrackerapi.api.dto.TaskStateDto;
 import ru.sakhapov.tasktrackerapi.api.dto.taskStateControllerDto.TaskStateCreateDto;
 import ru.sakhapov.tasktrackerapi.api.dto.taskStateControllerDto.TaskStateUpdateDto;
 import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.BadRequestException;
-import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.NotFoundException;
 import ru.sakhapov.tasktrackerapi.api.factories.TaskStateDtoFactory;
 import ru.sakhapov.tasktrackerapi.store.entities.ProjectEntity;
 import ru.sakhapov.tasktrackerapi.store.entities.TaskStateEntity;
@@ -25,21 +24,18 @@ import java.util.stream.Collectors;
 @Transactional
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequestMapping("/api")
 public class TaskStateController {
 
     TaskStateRepository taskStateRepository;
-
     TaskStateDtoFactory taskStateDtoFactory;
-
     ControllerHelper controllerHelper;
 
-    public static final String GET_TASK_STATES = "/api/projects/{project_id}/task-states";
-    public static final String CREATE_TASK_STATE = "/api/projects/{project_id}/task-states";
-    public static final String UPDATE_TASK_STATE = "/api/task-states/{task_state_id}";
-    public static final String DELETE_TASK_STATE = "/api/task-states/{task_state_id}";
 
-
-    @GetMapping(GET_TASK_STATES)
+    /**
+     * Получить все TaskState по ID проекта
+     */
+    @GetMapping("/projects/{project_id}/task-states")
     public List<TaskStateDto> getTaskStates(@PathVariable("project_id") Long projectId) {
 
         ProjectEntity project = controllerHelper.getProjectOrThrowException(projectId);
@@ -51,7 +47,10 @@ public class TaskStateController {
                 .collect(Collectors.toList());
     }
 
-    @PostMapping(CREATE_TASK_STATE)
+    /**
+     * Создание нового TaskState
+     */
+    @PostMapping("/projects/{project_id}/task-states")
     public TaskStateDto createTaskState(@PathVariable("project_id") Long projectId,
                                         @Valid @RequestBody TaskStateCreateDto dto) {
 
@@ -77,11 +76,14 @@ public class TaskStateController {
         return taskStateDtoFactory.makeTaskStateDto(savedTaskState);
     }
 
-    @PatchMapping(UPDATE_TASK_STATE)
+    /**
+     * Обновление TaskState по ID
+     */
+    @PatchMapping("/task-states/{task_state_id}")
     public TaskStateDto updateTaskState(@PathVariable("task_state_id") Long taskStateId,
                                         @Valid @RequestBody TaskStateUpdateDto dto) {
 
-        TaskStateEntity taskStateEntity = getTaskStateOrThrowException(taskStateId);
+        TaskStateEntity taskStateEntity = controllerHelper.getTaskStateOrThrowException(taskStateId);
 
         taskStateRepository
                 .findTaskStateEntityByProjectIdAndNameContainsIgnoreCase(taskStateEntity.getProject().getId(), dto.getName())
@@ -97,24 +99,16 @@ public class TaskStateController {
         return taskStateDtoFactory.makeTaskStateDto(taskStateEntity);
     }
 
-    @DeleteMapping(DELETE_TASK_STATE)
+    /**
+     * Удаление TaskState по ID
+     */
+    @DeleteMapping("/task-states/{task_state_id}")
     public AckDto deleteTaskState(@PathVariable(name = "task_state_id") Long taskStateId) {
 
-        TaskStateEntity changeTaskState = getTaskStateOrThrowException(taskStateId);
+        TaskStateEntity changeTaskState = controllerHelper.getTaskStateOrThrowException(taskStateId);
 
         taskStateRepository.delete(changeTaskState);
 
         return AckDto.builder().answer(true).build();
     }
-
-    private TaskStateEntity getTaskStateOrThrowException(Long taskStateId) {
-
-        return taskStateRepository
-                .findById(taskStateId)
-                .orElseThrow(() ->
-                        new NotFoundException(String.format("Task state this '%s' can't be found", taskStateId))
-                );
-    }
-
-
 }

@@ -23,7 +23,6 @@ import java.io.IOException;
 public class AuthController {
 
     AuthenticationService service;
-
     UserRepository repository;
 
     @PostMapping("/register")

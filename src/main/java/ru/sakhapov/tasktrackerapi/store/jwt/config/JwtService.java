@@ -1,6 +1,5 @@
 package ru.sakhapov.tasktrackerapi.store.jwt.config;
 
-import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;

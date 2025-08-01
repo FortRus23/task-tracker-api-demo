@@ -28,20 +28,17 @@ import java.util.stream.Stream;
 @Transactional
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequestMapping("/api/projects")
 public class ProjectController {
 
     ProjectRepository projectRepository;
-
     ProjectDtoFactory projectDtoFactory;
-
     ControllerHelper controllerHelper;
 
-    public static final String CREATE_PROJECT = "/api/projects";
-    public static final String DELETE_PROJECT = "/api/projects/{project_id}";
-    public static final String GET_PROJECTS = "/api/projects";
-    public static final String EDIT_PROJECT = "/api/projects/{project_id}";
-
-    @PostMapping(CREATE_PROJECT)
+    /**
+     * Создание нового проекта
+     */
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ProjectDto createProject(@Valid @RequestBody ProjectCreateDto dto) {
 
@@ -65,7 +62,10 @@ public class ProjectController {
     }
 
 
-    @PatchMapping(EDIT_PROJECT)
+    /**
+     * Обновление названия проекта
+     */
+    @PatchMapping("/{project_id}")
     public ProjectDto editProject(@PathVariable("project_id") Long projectId,
                                   @Valid @RequestBody ProjectUpdateDto dto) {
 
@@ -86,7 +86,10 @@ public class ProjectController {
         return projectDtoFactory.makeProjectDto(project);
     }
 
-    @GetMapping(GET_PROJECTS)
+    /**
+     * Получение списка всех проектов (опционально — фильтрация по префиксу имени)
+     */
+    @GetMapping
     public List<ProjectDto> fetchProjects(
             @RequestParam(value = "prefix_name", required = false) String prefixName) {
 
@@ -101,11 +104,13 @@ public class ProjectController {
                 .collect(Collectors.toList());
     }
 
-    @DeleteMapping(DELETE_PROJECT)
+    /**
+     * Удаление проекта по ID
+     */
+    @DeleteMapping("/{project_id}")
     public AckDto deleteProject(@PathVariable("project_id") Long projectId) {
 
         controllerHelper.getProjectOrThrowException(projectId);
-
         projectRepository.deleteById(projectId);
 
         return AckDto.makeDefault(true);

@@ -1,7 +1,7 @@
 package ru.sakhapov.tasktrackerapi.api.exceptionHandler;
 
-import org.aspectj.weaver.ast.Not;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -10,24 +10,24 @@ import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.ErrorDto;
 import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.InvalidCredentialsException;
 import ru.sakhapov.tasktrackerapi.api.exceptionHandler.exceptions.NotFoundException;
 
-import java.io.NotActiveException;
-import java.util.HashMap;
-import java.util.Map;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(
-            MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorDto> handleValidationError(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(FieldError::getDefaultMessage)
+                .orElse("Validation error");
 
-        Map<String, String> errors = new HashMap<>();
+        ErrorDto errorDto = ErrorDto.builder()
+                .error("validation_error")
+                .errorDescription(message)
+                .build();
 
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
-        );
-
-        return ResponseEntity.badRequest().body(errors);
+        return ResponseEntity.badRequest().body(errorDto);
     }
 
     @ExceptionHandler(BadRequestException.class)
@@ -53,5 +53,4 @@ public class GlobalExceptionHandler {
         errorDto.setErrorDescription(ex.getMessage());
         return ResponseEntity.badRequest().body(errorDto);
     }
-
 }

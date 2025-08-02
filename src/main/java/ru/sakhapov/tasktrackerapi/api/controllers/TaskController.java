@@ -32,7 +32,6 @@ public class TaskController {
     TaskDtoFactory taskDtoFactory;
     ControllerHelper controllerHelper;
 
-
     /**
      * Получить список задач внутри TaskState
      */

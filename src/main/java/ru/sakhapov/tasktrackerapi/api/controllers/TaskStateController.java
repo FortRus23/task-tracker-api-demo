@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.sakhapov.tasktrackerapi.api.controllers.helpers.ControllerHelper;
@@ -51,6 +52,7 @@ public class TaskStateController {
      * Создание нового TaskState
      */
     @PostMapping("/projects/{project_id}/task-states")
+    @ResponseStatus(HttpStatus.CREATED)
     public TaskStateDto createTaskState(@PathVariable("project_id") Long projectId,
                                         @Valid @RequestBody TaskStateCreateDto dto) {
 
